@@ -1,0 +1,10 @@
+fastapi
+uvicorn[standard]
+python-dotenv
+pandas
+tabulate
+sqlalchemy
+pymysql
+langchain-core
+langchain-openai
+langchain-huggingface
