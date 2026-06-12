@@ -14,15 +14,63 @@ let isSubmitting = false;
 
 const CHEVRON_SVG = `<svg class="accordion-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg>`;
 
+function apiBaseUrl() {
+  return (window.APP_CONFIG?.API_BASE_URL ?? "").trim().replace(/\/$/, "");
+}
+
 function apiUrl(path) {
-  const base = (window.APP_CONFIG?.API_BASE_URL ?? "").replace(/\/$/, "");
-  return `${base}${path}`;
+  return `${apiBaseUrl()}${path}`;
+}
+
+function isApiConfigured() {
+  return Boolean(apiBaseUrl());
+}
+
+function isGitHubPages() {
+  return location.hostname.endsWith("github.io");
+}
+
+async function parseJsonResponse(res) {
+  const contentType = res.headers.get("content-type") || "";
+  if (!contentType.includes("application/json")) {
+    const snippet = (await res.text()).trim().slice(0, 80);
+    if (snippet.startsWith("<")) {
+      throw new Error(
+        isApiConfigured()
+          ? "API returned HTML instead of JSON. Check API_BASE_URL in config.js."
+          : "Backend not connected. Set API_BASE_URL in config.js to your Render API URL."
+      );
+    }
+    throw new Error(snippet || `Unexpected response (${res.status})`);
+  }
+  return res.json();
+}
+
+function showApiBanner() {
+  const banner = document.getElementById("api-banner");
+  if (!banner) return;
+  if (isGitHubPages() && !isApiConfigured()) {
+    banner.hidden = false;
+    banner.textContent =
+      "Backend not configured — set API_BASE_URL in config.js to your Render API URL, then redeploy.";
+  }
 }
 
 async function loadSuggestions() {
+  if (!isApiConfigured()) {
+    showApiBanner();
+    renderSuggestions([
+      "Give me the names of 10 players",
+      "Who are the top 5 most valuable players?",
+      "Which country has produced the most players?",
+    ]);
+    return;
+  }
+
   try {
     const res = await fetch(apiUrl("/api/suggestions"));
-    const data = await res.json();
+    const data = await parseJsonResponse(res);
+    if (!res.ok) throw new Error(data.detail || "Failed to load suggestions.");
     renderSuggestions(data.suggestions);
   } catch {
     renderSuggestions([
@@ -211,13 +259,19 @@ async function submitQuestion(question) {
   setSubmitting(true);
 
   try {
+    if (!isApiConfigured()) {
+      throw new Error(
+        "Backend not connected. Set API_BASE_URL in config.js to your Render API URL."
+      );
+    }
+
     const res = await fetch(apiUrl("/api/query"), {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ question: trimmed }),
     });
 
-    const data = await res.json();
+    const data = await parseJsonResponse(res);
     if (!res.ok) {
       throw new Error(data.detail || "Something went wrong.");
     }
