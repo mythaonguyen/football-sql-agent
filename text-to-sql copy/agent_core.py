@@ -62,7 +62,19 @@ def get_database_url() -> str:
         user, password = userinfo.split(":", 1)
         rest = f"{user}:{quote(password, safe='')}@{hostpart}"
 
-    return _strip_unsupported_pg_query_params(f"postgresql+psycopg2://{rest}")
+    url = _strip_unsupported_pg_query_params(f"postgresql+psycopg2://{rest}")
+    _reject_direct_supabase_ipv6_url(url)
+    return url
+
+
+def _reject_direct_supabase_ipv6_url(url: str) -> None:
+    host = (urlsplit(url).hostname or "").lower()
+    if host.startswith("db.") and host.endswith(".supabase.co"):
+        raise RuntimeError(
+            "DATABASE_URL points at db.*.supabase.co (IPv6-only). Render cannot reach it. "
+            "In Supabase → Project Settings → Database → Connection string, select "
+            "'Session pooler' (port 5432), then set that URL as DATABASE_URL on Render."
+        )
 
 
 def _strip_unsupported_pg_query_params(url: str) -> str:
