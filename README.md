@@ -42,7 +42,7 @@ uvicorn app:app --host 0.0.0.0 --port $PORT
 ```
 
 Set environment variables:
-- `DATABASE_URL` — Supabase PostgreSQL connection string
+- `DATABASE_URL` — Supabase **Session pooler** string (`*.pooler.supabase.com:5432`, user `postgres.<project-ref>`). Avoid the direct `db.*.supabase.co` URL on Render — it is IPv6-only and fails with "Network is unreachable".
 - `HUGGINGFACEHUB_API_TOKEN`
 - `CORS_ORIGINS` — `https://mythaonguyen.github.io`
 
