@@ -1,6 +1,6 @@
 from pathlib import Path
 import os
-from urllib.parse import quote
+from urllib.parse import parse_qs, quote, urlencode, urlsplit, urlunsplit
 
 import pandas as pd
 from dotenv import load_dotenv
@@ -62,7 +62,21 @@ def get_database_url() -> str:
         user, password = userinfo.split(":", 1)
         rest = f"{user}:{quote(password, safe='')}@{hostpart}"
 
-    return f"postgresql+psycopg2://{rest}"
+    return _strip_unsupported_pg_query_params(f"postgresql+psycopg2://{rest}")
+
+
+def _strip_unsupported_pg_query_params(url: str) -> str:
+    """Remove query params that Supabase/Prisma accept but psycopg2 rejects."""
+    split = urlsplit(url)
+    if not split.query:
+        return url
+
+    params = parse_qs(split.query, keep_blank_values=True)
+    for key in ("pgbouncer", "api_key", "connection_limit", "pool_timeout"):
+        params.pop(key, None)
+
+    query = urlencode(params, doseq=True)
+    return urlunsplit((split.scheme, split.netloc, split.path, query, split.fragment))
 
 
 def create_db_engine():
