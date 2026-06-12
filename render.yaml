@@ -1,0 +1,16 @@
+services:
+  - type: web
+    name: pitchquery-api
+    runtime: python
+    rootDir: text-to-sql copy
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: DATABASE_URL
+        sync: false
+      - key: HUGGINGFACEHUB_API_TOKEN
+        sync: false
+      - key: USE_HUGGINGFACE
+        value: "true"
+      - key: CORS_ORIGINS
+        value: https://mythaonguyen.github.io

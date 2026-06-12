@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PitchQuery — Football SQL Agent</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet" />
+</head>
+<body>
+  <div class="page">
+    <header class="header">
+      <div class="header-badge">⚽ Text-to-SQL</div>
+      <h1>Football SQL Agent</h1>
+      <p class="subtitle">Ask questions about players, clubs, transfers, and games in plain English.</p>
+    </header>
+
+    <section class="suggestions-section" aria-label="Suggested questions">
+      <h2 class="section-label">Try asking</h2>
+      <div id="suggestions" class="suggestions"></div>
+    </section>
+
+    <section class="input-section" aria-label="Ask a question">
+      <form id="query-form" class="query-form">
+        <label for="question-input" class="visually-hidden">Your question</label>
+        <textarea
+          id="question-input"
+          rows="2"
+          placeholder="e.g. Who are the top 5 most valuable players?"
+          autocomplete="off"
+        ></textarea>
+        <button type="submit" id="submit-btn">
+          <span class="btn-label">Ask</span>
+          <span class="btn-spinner" hidden aria-hidden="true"></span>
+        </button>
+      </form>
+    </section>
+
+    <section class="history-section" aria-label="Question history">
+      <div class="history-header">
+        <h2 class="section-label">Your questions</h2>
+        <span id="history-count" class="history-count">0 questions</span>
+      </div>
+      <div id="history-empty" class="history-empty">
+        <p>No questions yet. Pick a suggestion above or type your own.</p>
+      </div>
+      <div id="history-list" class="history-list" role="list"></div>
+    </section>
+  </div>
+
+  <script src="config.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

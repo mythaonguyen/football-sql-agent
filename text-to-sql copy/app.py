@@ -1,6 +1,8 @@
+import os
 from pathlib import Path
 
 from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
@@ -8,6 +10,19 @@ from pydantic import BaseModel, Field
 from agent_core import SUGGESTED_QUESTIONS, answer_user_query
 
 app = FastAPI(title="Football SQL Agent")
+
+CORS_ORIGINS = os.getenv(
+    "CORS_ORIGINS",
+    "https://mythaonguyen.github.io,http://127.0.0.1:8000,http://localhost:8000",
+).split(",")
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[origin.strip() for origin in CORS_ORIGINS if origin.strip()],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 STATIC_DIR = Path(__file__).parent / "static"
 app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
